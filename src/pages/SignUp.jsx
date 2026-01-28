@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { registerUser, loginUser } from "../utils/authService";
 import signupImg from "../assets/images/doctor-consult.jpeg";
+import logoImg from "../assets/images/logo.png";
+import backgroundLeaf from "../assets/images/backroundleaf.png";
 
 export default function SignUp() {
   const { isAuthenticated, login } = useAuth();
@@ -107,7 +109,8 @@ export default function SignUp() {
 
         if (loginResult.success) {
           login(loginResult.session.user);
-          navigate("/dashboard");
+          // Redirect to profile setup for new users
+          navigate("/setup-profile");
         } else {
           setErrorMessage("Account created but login failed. Please try logging in.");
         }
@@ -123,7 +126,18 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-2 relative overflow-hidden">
+      {/* Background Leaf */}
+      <div 
+        className="absolute top-0 right-0 w-[500px] h-[500px] opacity-15 -z-0"
+        style={{
+          backgroundImage: `url(${backgroundLeaf})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'top right',
+          backgroundRepeat: 'no-repeat',
+          transform: 'translate(10%, -10%)'
+        }}
+      />
       {/* LEFT IMAGE */}
       <div className="hidden lg:block relative">
         <img
@@ -133,20 +147,27 @@ export default function SignUp() {
         />
 
         <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white flex justify-around py-6">
-          <span>🔒 Secure & Private</span>
-          <span>❤️ 24/7 Support</span>
-          <span>🏥 Quality Care</span>
+          <span> Secure & Private</span>
+          <span> 24/7 Support</span>
+          <span> Quality Care</span>
         </div>
       </div>
 
       {/* RIGHT FORM */}
-      <div className="flex items-center justify-center bg-emerald-50 px-8 py-8">
+      <div className="flex items-center justify-center bg-sky-50 px-8 py-8 relative z-10">
         <div className="w-full max-w-md">
-          <div className="mb-10">
-            <h1 className="text-4xl font-bold mb-2">Create an Account</h1>
+          <div className="mb-10 flex items-center gap-3">
+            <img 
+              src={logoImg} 
+              alt="NovaCare Logo" 
+              className="h-12 w-12 object-contain"
+            />
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Create an Account</h1>
             <p className="text-slate-600">
               Join our predictive AI healthcare platform.
             </p>
+            </div>
           </div>
 
           {errorMessage && (

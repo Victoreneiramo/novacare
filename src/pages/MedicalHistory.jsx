@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logoImg from "../assets/images/LOGO.jpeg";
+import logoImg from "../assets/images/logo.png";
+import backgroundLeaf from "../assets/images/backroundleaf.png";
 
 function MedicalHistory() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [healthProfile, setHealthProfile] = useState(null);
+  const [testHistory, setTestHistory] = useState([]);
 
   useEffect(() => {
     // Load health profile from localStorage
@@ -15,6 +17,15 @@ function MedicalHistory() {
     );
     const userProfile = profiles.find((p) => p.userId === user?.id);
     setHealthProfile(userProfile);
+
+    // Load test history from localStorage
+    const allTests = JSON.parse(
+      localStorage.getItem("novacare_test_results") || "[]"
+    );
+    const userTests = allTests
+      .filter((test) => test.userId === user?.id)
+      .sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent first
+    setTestHistory(userTests);
   }, [user]);
 
   const handleLogout = () => {
@@ -41,10 +52,43 @@ function MedicalHistory() {
     return bmi;
   };
 
+  const getHealthScoreTag = (score) => {
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Moderate";
+    return "Needs Attention";
+  };
+
+  const getHealthScoreColor = (score) => {
+    if (score >= 80) return "text-emerald-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   if (!healthProfile) {
     return (
-      <div className="min-h-screen bg-sky-50">
-        <header className="bg-white shadow-sm">
+      <div className="min-h-screen bg-sky-50 relative overflow-hidden">
+        <div 
+          className="absolute top-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
+          style={{
+            backgroundImage: `url(${backgroundLeaf})`,
+            backgroundSize: 'contain',
+            backgroundPosition: 'top right',
+            backgroundRepeat: 'no-repeat',
+            transform: 'translate(15%, -15%)'
+          }}
+        />
+        <header className="bg-white shadow-sm relative z-10">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
             <div className="flex items-center gap-3 font-bold text-xl">
               <img
@@ -62,7 +106,7 @@ function MedicalHistory() {
             </button>
           </div>
         </header>
-        <div className="max-w-4xl mx-auto px-8 py-20">
+        <div className="max-w-4xl mx-auto px-8 py-20 relative z-10">
           <div className="bg-white rounded-2xl shadow-lg p-10 text-center">
             <h2 className="text-2xl font-bold mb-4">No Health Profile Found</h2>
             <p className="text-slate-600 mb-6">
@@ -81,9 +125,20 @@ function MedicalHistory() {
   }
 
   return (
-    <div className="min-h-screen bg-sky-50">
+    <div className="min-h-screen bg-sky-50 relative overflow-hidden">
+      {/* Background Leaf */}
+      <div 
+        className="absolute top-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
+        style={{
+          backgroundImage: `url(${backgroundLeaf})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'top right',
+          backgroundRepeat: 'no-repeat',
+          transform: 'translate(15%, -15%)'
+        }}
+      />
       {/* NAVBAR */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <header className="bg-white shadow-sm sticky top-0 z-50 relative">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
           <div className="flex items-center gap-3 font-bold text-xl">
             <img
@@ -110,7 +165,7 @@ function MedicalHistory() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-6xl mx-auto px-8 py-12 relative z-10">
         <div className="mb-8 flex items-center gap-6">
           <div>
             {healthProfile.profilePicture ? (
@@ -261,6 +316,125 @@ function MedicalHistory() {
             </ul>
           ) : (
             <p className="text-slate-500">No medications recorded</p>
+          )}
+        </div>
+
+        {/* Test History Card */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-slate-900">
+              Test History
+            </h2>
+            <button
+              onClick={() => navigate("/test-selection", { state: healthProfile })}
+              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              + Run New Test
+            </button>
+          </div>
+          {testHistory.length > 0 ? (
+            <div className="space-y-4">
+              {testHistory.map((test) => (
+                <div
+                  key={test.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-semibold text-lg text-slate-900">
+                        {test.testName}
+                      </h3>
+                      <p className="text-sm text-slate-500">
+                        {formatDate(test.date)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-2xl font-bold ${getHealthScoreColor(test.riskScore)}`}>
+                        {test.riskScore}%
+                      </div>
+                      <div className={`text-sm ${getHealthScoreColor(test.riskScore)}`}>
+                        {getHealthScoreTag(test.riskScore)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-2 text-sm">
+                    {test.testType === "cardio" ? (
+                      <>
+                        <div>
+                          <span className="text-slate-600">Age:</span>{" "}
+                          <span className="font-medium">{test.inputs?.age_years || "N/A"}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Blood Pressure:</span>{" "}
+                          <span className="font-medium">
+                            {test.inputs?.ap_hi && test.inputs?.ap_lo
+                              ? `${test.inputs.ap_hi}/${test.inputs.ap_lo}`
+                              : "N/A"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Cholesterol:</span>{" "}
+                          <span className="font-medium">
+                            {test.inputs?.cholesterol === 1 ? "Normal" : 
+                             test.inputs?.cholesterol === 2 ? "Above Normal" :
+                             test.inputs?.cholesterol === 3 ? "Well Above Normal" : "N/A"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Glucose:</span>{" "}
+                          <span className="font-medium">
+                            {test.inputs?.gluc === 1 ? "Normal" : 
+                             test.inputs?.gluc === 2 ? "Above Normal" :
+                             test.inputs?.gluc === 3 ? "Well Above Normal" : "N/A"}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <span className="text-slate-600">Age:</span>{" "}
+                          <span className="font-medium">{test.inputs?.Age || "N/A"}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Gender:</span>{" "}
+                          <span className="font-medium">
+                            {test.inputs?.Gender === 1 ? "Male" : "Female"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Chest Pain:</span>{" "}
+                          <span className="font-medium">
+                            {test.inputs?.Chest_Pain === 1 ? "Yes" : "No"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Shortness of Breath:</span>{" "}
+                          <span className="font-medium">
+                            {test.inputs?.Shortness_of_Breath === 1 ? "Yes" : "No"}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => navigate("/diagnosis-result", { state: test })}
+                    className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    View Full Results →
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-slate-500 mb-4">No test history available</p>
+              <button
+                onClick={() => navigate("/test-selection", { state: healthProfile })}
+                className="bg-emerald-600 text-white px-6 py-2 rounded-full hover:bg-emerald-700 transition-colors font-medium text-sm"
+              >
+                Run Your First Test
+              </button>
+            </div>
           )}
         </div>
 

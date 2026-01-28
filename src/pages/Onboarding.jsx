@@ -2,9 +2,8 @@ import { Link } from "react-router-dom";
 import heroImg from "../assets/images/doctor-patient.jpeg";
 import consultImg from "../assets/images/doctor-consult.jpeg";
 import aiImg from "../assets/images/ai-health.jpeg";
-import logoImg from "../assets/images/LOGO.jpeg";
-import backgroundImg from "../assets/images/background.jpeg";
-
+import logoImg from "../assets/images/logo.png";
+import backgroundLeaf from "../assets/images/backroundleaf.png";
 export default function Onboarding() {
   return (
     <div className="font-sans text-slate-900 bg-white relative">
@@ -37,8 +36,19 @@ export default function Onboarding() {
       </header>
 
       {/* HERO */}
-      <section id="home" className="bg-white">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center px-8 py-24">
+      <section id="home" className="bg-white relative overflow-hidden">
+        {/* Leaf background - Top Right */}
+        <div 
+          className="absolute top-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
+          style={{
+            backgroundImage: `url(${backgroundLeaf})`,
+            backgroundSize: 'contain',
+            backgroundPosition: 'top right',
+            backgroundRepeat: 'no-repeat',
+            transform: 'translate(20%, -20%)'
+          }}
+        />
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center px-8 py-24 relative z-10">
           <div>
             <h1 className="text-5xl xl:text-6xl font-extrabold leading-tight">
               The Future of <br /> Predictive Healthcare is Here.
@@ -106,7 +116,7 @@ export default function Onboarding() {
         <div 
           className="absolute top-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
           style={{
-            backgroundImage: `url(${backgroundImg})`,
+            backgroundImage: `url(${backgroundLeaf})`,
             backgroundSize: 'contain',
             backgroundPosition: 'top right',
             backgroundRepeat: 'no-repeat',
@@ -143,7 +153,7 @@ export default function Onboarding() {
         <div 
           className="absolute bottom-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
           style={{
-            backgroundImage: `url(${backgroundImg})`,
+            backgroundImage: `url(${backgroundLeaf})`,
             backgroundSize: 'contain',
             backgroundPosition: 'bottom right',
             backgroundRepeat: 'no-repeat',
@@ -172,8 +182,19 @@ export default function Onboarding() {
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="bg-sky-50">
-        <div className="max-w-7xl mx-auto px-8 py-24">
+      <section id="services" className="bg-sky-50 relative overflow-hidden">
+        {/* Leaf background - Top Right */}
+        <div 
+          className="absolute top-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
+          style={{
+            backgroundImage: `url(${backgroundLeaf})`,
+            backgroundSize: 'contain',
+            backgroundPosition: 'top right',
+            backgroundRepeat: 'no-repeat',
+            transform: 'translate(15%, -10%)'
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-8 py-24 relative z-10">
           <h2 className="text-4xl font-bold mb-14">Services</h2>
           <div className="space-y-8">
             {[
@@ -208,7 +229,7 @@ export default function Onboarding() {
         <div 
           className="absolute bottom-0 left-0 w-[300px] h-[300px] opacity-15 -z-0"
           style={{
-            backgroundImage: `url(${backgroundImg})`,
+            backgroundImage: `url(${backgroundLeaf})`,
             backgroundSize: 'contain',
             backgroundPosition: 'bottom left',
             backgroundRepeat: 'no-repeat',

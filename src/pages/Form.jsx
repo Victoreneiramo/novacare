@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logoImg from "../assets/images/LOGO.jpeg";
+import logoImg from "../assets/images/logo.png";
+import backgroundLeaf from "../assets/images/backroundleaf.png";
 
 export default function Form() {
   const { user, loading: authLoading } = useAuth();
@@ -15,6 +16,7 @@ export default function Form() {
     gender: "",
     bloodGroup: "",
     genotype: "",
+    bloodPressure: "",
     medicalHistory: [],
     symptoms: [],
     medications: [""],
@@ -129,6 +131,32 @@ export default function Form() {
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/login");
+    } else if (user) {
+      // Load existing profile data from localStorage
+      const profiles = JSON.parse(
+        localStorage.getItem("novacare_health_profiles") || "[]"
+      );
+      const userProfile = profiles.find((p) => p.userId === user.id);
+      if (userProfile) {
+        setFormData({
+          height: userProfile.height || "",
+          weight: userProfile.weight || "",
+          dob: userProfile.dob || "",
+          gender: userProfile.gender || "",
+          bloodGroup: userProfile.bloodGroup || "",
+          genotype: userProfile.genotype || "",
+          bloodPressure: userProfile.bloodPressure || "",
+          medicalHistory: userProfile.medicalHistory || [],
+          symptoms: userProfile.symptoms || [],
+          medications: userProfile.medications && userProfile.medications.length > 0 
+            ? userProfile.medications 
+            : [""],
+          profilePicture: userProfile.profilePicture || "",
+        });
+        if (userProfile.profilePicture) {
+          setProfilePicturePreview(userProfile.profilePicture);
+        }
+      }
     }
   }, [user, authLoading, navigate]);
 
@@ -164,6 +192,9 @@ export default function Form() {
       setIsSubmitting(false);
       return;
     }
+    
+    // Calculate age from DOB
+    const age = formData.dob ? Math.floor((new Date().getTime() - new Date(formData.dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null;
 
     if (!user?.id) {
       alert("User not found. Please log in again.");
@@ -177,7 +208,12 @@ export default function Form() {
       const healthProfile = {
         ...formData,
         userId: user.id,
+        age: age,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Get existing profiles or create new array
@@ -214,9 +250,20 @@ export default function Form() {
   };
 
   return (
-    <div className="min-h-screen bg-sky-50">
+    <div className="min-h-screen bg-sky-50 relative overflow-hidden">
+      {/* Background Leaf */}
+      <div 
+        className="absolute top-0 right-0 w-[600px] h-[600px] opacity-20 -z-0"
+        style={{
+          backgroundImage: `url(${backgroundLeaf})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'top right',
+          backgroundRepeat: 'no-repeat',
+          transform: 'translate(15%, -15%)'
+        }}
+      />
       {/* NAVBAR */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <header className="bg-white shadow-sm sticky top-0 z-50 relative">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
           <div className="flex items-center gap-3 font-bold text-xl">
             <img
@@ -229,7 +276,7 @@ export default function Form() {
         </div>
       </header>
 
-      <div className="px-8 py-12">
+      <div className="px-8 py-12 relative z-10">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 md:p-10">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Health Profile Setup</h1>
@@ -396,6 +443,22 @@ export default function Form() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Blood Pressure (mmHg)
+                  </label>
+                  <input
+                    type="text"
+                    name="bloodPressure"
+                    placeholder="e.g., 120/80"
+                    value={formData.bloodPressure}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    pattern="\d{2,3}/\d{2,3}"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">Format: Systolic/Diastolic (e.g., 120/80)</p>
                 </div>
               </div>
             </section>
