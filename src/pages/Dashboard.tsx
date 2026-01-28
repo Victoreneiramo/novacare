@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import logoImg from "../assets/images/logo.png";
 import backgroundLeaf from "../assets/images/backroundleaf.png";
 
-
 // --- Type definitions ---
 interface User {
   id: string;
@@ -164,7 +163,7 @@ function Dashboard() {
   };
   const fullName = getFullName();
 
-  // Health Score Gauge Component
+  // Health Score Gauge Component - Original large version
   const HealthScoreGauge = ({ score }: { score: number | null }) => {
     if (score === null) {
       return (
@@ -217,6 +216,57 @@ function Dashboard() {
         <p className="text-xs text-slate-500 mt-1">
           Last updated: {new Date().toLocaleDateString()}
         </p>
+      </div>
+    );
+  };
+
+  // Small Health Score Gauge Component for cards
+  const HealthScoreGaugeSmall = ({ score }: { score: number | null }) => {
+    if (score === null) {
+      return (
+        <div className="flex flex-col items-center justify-center h-20">
+          <span className="text-lg font-bold text-gray-400">N/A</span>
+        </div>
+      );
+    }
+
+    const percentage = score;
+    const radius = 24; // Smaller radius for card
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+    const color = score >= 80 ? "#10b981" : score >= 60 ? "#eab308" : "#ef4444";
+
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="relative w-16 h-16">
+          <svg className="transform -rotate-90 w-16 h-16">
+            <circle
+              cx="32"
+              cy="32"
+              r={radius}
+              stroke="#e5e7eb"
+              strokeWidth="6"
+              fill="none"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r={radius}
+              stroke={color}
+              strokeWidth="6"
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              className="transition-all duration-500"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-sm font-bold" style={{ color }}>{score}</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -343,8 +393,8 @@ function Dashboard() {
                         </div>
                       </div>
                       {healthScore !== null && (
-                        <div className="w-16 h-16">
-                          <HealthScoreGauge score={healthScore} />
+                        <div className="ml-4">
+                          <HealthScoreGaugeSmall score={healthScore} />
                         </div>
                       )}
                     </div>
