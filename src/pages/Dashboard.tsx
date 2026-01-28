@@ -285,35 +285,17 @@ function Dashboard() {
         }}
       />
 
-      {/* Top Navigation */}
-      <header className="bg-white shadow-sm sticky top-0 z-50 relative">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 font-bold text-xl">
+      <div className="flex">
+        {/* Left Sidebar */}
+        <aside className="w-64 bg-white shadow-md p-6 min-h-screen relative z-10 flex flex-col">
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 font-bold text-xl mb-8 pb-6 border-b border-gray-200">
             <img src={logoImg} alt="NovaCare Logo" className="h-10 w-10 object-contain" />
             <span className="text-slate-900">NOVA CARE</span>
           </div>
-          <nav className="hidden lg:flex gap-6 text-sm font-medium text-slate-600">
-            <a href="#home" className="hover:text-slate-900">HOME</a>
-            <a href="#dashboard" className="hover:text-slate-900">DASHBOARD</a>
-            <a href="#diagnostics" className="hover:text-slate-900">AI DIAGNOSTICS</a>
-            <a href="#about" className="hover:text-slate-900">ABOUT US</a>
-            <a href="#contact" className="hover:text-slate-900">CONTACT</a>
-          </nav>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm hover:bg-slate-800 transition-colors"
-            >
-              PATIENT LOGIN
-            </button>
-          </div>
-        </div>
-      </header>
 
-      <div className="flex">
-        {/* Left Sidebar */}
-        <aside className="w-64 bg-white shadow-md p-6 min-h-[calc(100vh-80px)] relative z-10">
-          <nav className="space-y-2">
+          {/* Navigation */}
+          <nav className="space-y-2 flex-1">
             {[
               { label: "Dashboard", icon: "📊" },
               { label: "Health Profile", icon: "👤" },
@@ -329,6 +311,8 @@ function Dashboard() {
               />
             ))}
           </nav>
+
+          {/* Logout Button */}
           <div className="mt-auto pt-8">
             <button
               onClick={handleLogout}
