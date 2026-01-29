@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logoImg from "../assets/images/logo.png";
-import backgroundLeaf from "../assets/images/backroundleaf.png";
+import { 
+  MdDashboard, 
+  MdPerson, 
+  MdHistory, 
+  MdSettings,
+  MdFavorite,
+  MdMonitorWeight,
+  MdHealthAndSafety
+} from "react-icons/md";
+import { IoMdArrowForward } from "react-icons/io";
+import { FaStethoscope, FaUserEdit, FaHandPaper } from "react-icons/fa";
+
+// @ts-ignore - Ignore image import errors
+import logoImg from "../assets/images/Logo.png";
+// @ts-ignore - Ignore image import errors
+import backgroundLeaf from "../assets/images/background.png";
 
 // --- Type definitions ---
 interface User {
@@ -34,9 +48,19 @@ interface HealthProfile {
 
 interface SidebarItemProps {
   label: string;
-  icon?: string;
+  icon?: React.ReactNode;
   active: boolean;
   onClick: () => void;
+}
+
+interface TestResult {
+  id: string;
+  userId: string;
+  testName: string;
+  date: string;
+  timestamp: number;
+  riskScore: number;
+  [key: string]: any;
 }
 
 function Dashboard() {
@@ -136,7 +160,7 @@ function Dashboard() {
         navigate("/medical-history");
         break;
       case "Settings":
-        // TODO: Navigate to settings page when implemented
+        navigate("/settings");
         break;
       default:
         break;
@@ -163,63 +187,6 @@ function Dashboard() {
   };
   const fullName = getFullName();
 
-  // Health Score Gauge Component - Original large version
-  const HealthScoreGauge = ({ score }: { score: number | null }) => {
-    if (score === null) {
-      return (
-        <div className="flex flex-col items-center justify-center h-48">
-          <span className="text-4xl font-bold text-gray-400">N/A</span>
-          <span className="text-sm text-gray-500 mt-2">No data available</span>
-        </div>
-      );
-    }
-
-    const percentage = score;
-    const circumference = 2 * Math.PI * 60; // radius = 60
-    const offset = circumference - (percentage / 100) * circumference;
-    const color = score >= 80 ? "#10b981" : score >= 60 ? "#eab308" : "#ef4444";
-
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <div className="relative w-40 h-40">
-          <svg className="transform -rotate-90 w-40 h-40">
-            <circle
-              cx="80"
-              cy="80"
-              r="60"
-              stroke="#e5e7eb"
-              strokeWidth="12"
-              fill="none"
-            />
-            <circle
-              cx="80"
-              cy="80"
-              r="60"
-              stroke={color}
-              strokeWidth="12"
-              fill="none"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              strokeLinecap="round"
-              className="transition-all duration-500"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-4xl font-bold" style={{ color }}>{score}</span>
-            </div>
-          </div>
-        </div>
-        <span className={`text-sm font-medium mt-2 ${getHealthScoreColor(score)}`}>
-          {getHealthScoreTag(score)}
-        </span>
-        <p className="text-xs text-slate-500 mt-1">
-          Last updated: {new Date().toLocaleDateString()}
-        </p>
-      </div>
-    );
-  };
-
   // Small Health Score Gauge Component for cards
   const HealthScoreGaugeSmall = ({ score }: { score: number | null }) => {
     if (score === null) {
@@ -231,7 +198,7 @@ function Dashboard() {
     }
 
     const percentage = score;
-    const radius = 24; // Smaller radius for card
+    const radius = 24;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (percentage / 100) * circumference;
     const color = score >= 80 ? "#10b981" : score >= 60 ? "#eab308" : "#ef4444";
@@ -285,40 +252,22 @@ function Dashboard() {
         }}
       />
 
-      {/* Top Navigation */}
-      <header className="bg-white shadow-sm sticky top-0 z-50 relative">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 font-bold text-xl">
+      <div className="flex">
+        {/* Left Sidebar */}
+        <aside className="w-64 bg-white shadow-md p-6 min-h-screen relative z-10 flex flex-col">
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 font-bold text-xl mb-8 pb-6 border-b border-gray-200">
             <img src={logoImg} alt="NovaCare Logo" className="h-10 w-10 object-contain" />
             <span className="text-slate-900">NOVA CARE</span>
           </div>
-          <nav className="hidden lg:flex gap-6 text-sm font-medium text-slate-600">
-            <a href="#home" className="hover:text-slate-900">HOME</a>
-            <a href="#dashboard" className="hover:text-slate-900">DASHBOARD</a>
-            <a href="#diagnostics" className="hover:text-slate-900">AI DIAGNOSTICS</a>
-            <a href="#about" className="hover:text-slate-900">ABOUT US</a>
-            <a href="#contact" className="hover:text-slate-900">CONTACT</a>
-          </nav>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm hover:bg-slate-800 transition-colors"
-            >
-              PATIENT LOGIN
-            </button>
-          </div>
-        </div>
-      </header>
 
-      <div className="flex">
-        {/* Left Sidebar */}
-        <aside className="w-64 bg-white shadow-md p-6 min-h-[calc(100vh-80px)] relative z-10">
-          <nav className="space-y-2">
+          {/* Navigation */}
+          <nav className="space-y-2 flex-1">
             {[
-              { label: "Dashboard", icon: "📊" },
-              { label: "Health Profile", icon: "👤" },
-              { label: "Medical History", icon: "🏥" },
-              { label: "Settings", icon: "⚙️" },
+              { label: "Dashboard", icon: <MdDashboard className="text-xl" /> },
+              { label: "Health Profile", icon: <MdPerson className="text-xl" /> },
+              { label: "Medical History", icon: <MdHistory className="text-xl" /> },
+              { label: "Settings", icon: <MdSettings className="text-xl" /> },
             ].map(item => (
               <SidebarItem 
                 key={item.label} 
@@ -329,6 +278,8 @@ function Dashboard() {
               />
             ))}
           </nav>
+
+          {/* Logout Button */}
           <div className="mt-auto pt-8">
             <button
               onClick={handleLogout}
@@ -345,8 +296,8 @@ function Dashboard() {
             {/* Page Header */}
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">
-                  Welcome, {fullName} 👋
+                <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+                  Welcome, {fullName} <FaHandPaper className="text-yellow-500" />
                 </h1>
                 <p className="text-slate-600 mt-2">
                   Here's an overview of your health status
@@ -381,7 +332,7 @@ function Dashboard() {
                   <div className="bg-white rounded-2xl shadow-md p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm text-slate-500 font-medium">Health Score</h3>
-                      <span className="text-2xl">📊</span>
+                      <MdHealthAndSafety className="text-3xl text-emerald-600" />
                     </div>
                     <div className="flex items-end justify-between">
                       <div>
@@ -404,7 +355,7 @@ function Dashboard() {
                   <div className="bg-white rounded-2xl shadow-md p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm text-slate-500 font-medium">BMI</h3>
-                      <span className="text-2xl">⚖️</span>
+                      <MdMonitorWeight className="text-3xl text-blue-600" />
                     </div>
                     <div className="flex items-end justify-between">
                       <div>
@@ -422,7 +373,7 @@ function Dashboard() {
                   <div className="bg-white rounded-2xl shadow-md p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm text-slate-500 font-medium">Blood Pressure</h3>
-                      <span className="text-2xl">🩺</span>
+                      <MdFavorite className="text-3xl text-red-600" />
                     </div>
                     <div className="flex items-end justify-between">
                       <div>
@@ -443,9 +394,9 @@ function Dashboard() {
                     <h2 className="text-xl font-semibold text-slate-900">Your Profile</h2>
                     <button
                       onClick={() => navigate("/medical-history")}
-                      className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                      className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                     >
-                      View Full Profile →
+                      View Full Profile <IoMdArrowForward />
                     </button>
                   </div>
                   <div className="flex items-center gap-6">
@@ -457,7 +408,7 @@ function Dashboard() {
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-300">
-                        <span className="text-gray-400 text-xl">👤</span>
+                        <MdPerson className="text-gray-400 text-3xl" />
                       </div>
                     )}
                     <div className="flex-1">
@@ -483,7 +434,7 @@ function Dashboard() {
                       onClick={() => navigate("/medical-history")}
                       className="p-4 border-2 border-gray-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left"
                     >
-                      <div className="text-2xl mb-2">👤</div>
+                      <MdPerson className="text-3xl text-emerald-600 mb-2" />
                       <h3 className="font-semibold text-slate-900 mb-1">View Health Profile</h3>
                       <p className="text-sm text-slate-600">
                         Review your complete health information
@@ -493,7 +444,7 @@ function Dashboard() {
                       onClick={() => navigate("/test-selection", { state: healthProfile })}
                       className="p-4 border-2 border-gray-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left"
                     >
-                      <div className="text-2xl mb-2">🩺</div>
+                      <FaStethoscope className="text-3xl text-red-600 mb-2" />
                       <h3 className="font-semibold text-slate-900 mb-1">Run Diagnosis</h3>
                       <p className="text-sm text-slate-600">
                         Analyze your health with AI diagnostics
@@ -503,7 +454,7 @@ function Dashboard() {
                       onClick={() => navigate("/setup-profile")}
                       className="p-4 border-2 border-gray-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left"
                     >
-                      <div className="text-2xl mb-2">⚙️</div>
+                      <FaUserEdit className="text-3xl text-slate-600 mb-2" />
                       <h3 className="font-semibold text-slate-900 mb-1">Update Profile</h3>
                       <p className="text-sm text-slate-600">
                         Edit your health information
@@ -514,13 +465,13 @@ function Dashboard() {
 
                 {/* Recent Test Results */}
                 {(() => {
-                  const allTests = JSON.parse(
+                  const allTests: TestResult[] = JSON.parse(
                     localStorage.getItem("novacare_test_results") || "[]"
                   );
                   const userTests = allTests
-                    .filter((test) => test.userId === healthProfile.userId)
-                    .sort((a, b) => b.timestamp - a.timestamp)
-                    .slice(0, 3); // Show only 3 most recent
+                    .filter((test: TestResult) => test.userId === healthProfile.userId)
+                    .sort((a: TestResult, b: TestResult) => b.timestamp - a.timestamp)
+                    .slice(0, 3);
 
                   if (userTests.length > 0) {
                     return (
@@ -529,13 +480,13 @@ function Dashboard() {
                           <h2 className="text-xl font-semibold text-slate-900">Recent Test Results</h2>
                           <button
                             onClick={() => navigate("/medical-history")}
-                            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                           >
-                            View All →
+                            View All <IoMdArrowForward />
                           </button>
                         </div>
                         <div className="space-y-3">
-                          {userTests.map((test) => (
+                          {userTests.map((test: TestResult) => (
                             <div
                               key={test.id}
                               className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -557,9 +508,9 @@ function Dashboard() {
                                 </div>
                                 <button
                                   onClick={() => navigate("/diagnosis-result", { state: test })}
-                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
                                 >
-                                  View →
+                                  View <IoMdArrowForward />
                                 </button>
                               </div>
                             </div>
